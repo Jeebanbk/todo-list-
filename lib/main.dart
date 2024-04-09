@@ -1,21 +1,19 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
 import 'package:todolist/AddScreen.dart';
+import 'package:todolist/controller/todo_controller.dart';
 import 'utils/mainScreen.dart';
 
 void main() {
-  (runApp(MaterialApp(
-    home: MyApp(),
+  (
+    runApp(const MyApp()
   )
-      // const MyApp()
-      ));
+  );
 }
 
 class MyApp extends StatefulWidget {
   
-  MyApp({
+  const MyApp({
     super.key,
   });
 
@@ -25,44 +23,54 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   List taskitems = ["jeeban"];
-
+  final TodoController todoController = Get.put(TodoController());
+  
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "TODO LIST APP",
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            "TODO LIST",
-            style: TextStyle(
-                fontSize: 25, fontWeight: FontWeight.bold, color: Colors.white),
+    return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+        title: "TODO LIST APP",
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text(
+              "TODO LIST",
+              style: TextStyle(
+                  fontSize: 25, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            backgroundColor: Colors.blueGrey,
           ),
-          backgroundColor: Colors.blueGrey,
-        ),
-        body: Padding(
-          padding: const EdgeInsets.only(top: 15, right: 6, left: 6),
-          child: ListView.separated(
-            itemBuilder: (context, index) {
-              return AddItem(
-                textname: taskitems[index],
-              );
+          body: Padding(
+            padding: const EdgeInsets.only(top: 15, right: 6, left: 6),
+            child:
+            
+             Obx(() {
+              return 
+               todoController.tasks.isNotEmpty?
+                  ListView.separated(
+              itemBuilder: (context, index) {
+                return AddItem(
+                  task:todoController.tasks[index] ,
+                );
+              },
+              separatorBuilder: (context, index) {
+                return const SizedBox(height: 15);
+              },
+              itemCount: todoController.tasks.length,
+            ):const Center(child: Text("No Task Found"),);
+            },)
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              // Navigator.of(context).push(MaterialPageRoute(
+              //     builder: (context) => AddScreen(
+              //           item: taskitems,
+              //         )));
+              Get.to(AddScreen());
             },
-            separatorBuilder: (context, index) {
-              return SizedBox(height: 15);
-            },
-            itemCount: taskitems.length,
+            child: const Icon(Icons.add),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => AddScreen(
-                      item: taskitems,
-                    )));
-          },
-          child: const Icon(Icons.add),
-        ),
-      ),
+
     );
   }
 }

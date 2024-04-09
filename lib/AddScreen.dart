@@ -1,15 +1,22 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
+import 'package:todolist/controller/todo_controller.dart';
 import 'package:todolist/main.dart';
+import 'package:todolist/models/task.dart';
 import 'package:todolist/utils/mainScreen.dart';
 
 class AddScreen extends StatefulWidget {
-  List item;
+  bool isEditPage=false;
+  int index=0;
+  String task='';
 
   AddScreen({
     super.key,
-    required this.item,
+    this.isEditPage=false,
+    this.index=0,
+    this.task=''
   });
 
   @override
@@ -19,6 +26,34 @@ class AddScreen extends StatefulWidget {
 class _AddItemState extends State<AddScreen> {
   final _formkey = GlobalKey<FormState>();
   TextEditingController itemscontroller = TextEditingController();
+  final TodoController todoController = Get.find<TodoController>();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    itemscontroller.text=widget.task;
+  }
+
+  void addTask()
+  {
+      if (_formkey.currentState!.validate()) {
+                      Task task =  Task(itemscontroller.text, false);
+                      todoController.add(task);
+                      itemscontroller.text = "";
+
+                     
+                    }
+                    Get.back();
+  }
+
+  void updateTask()
+  {
+      Task task = todoController.tasks[widget.index];
+      task.task=itemscontroller.text;
+      todoController.updateTask(widget.index, task);
+      Get.back();
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,8 +62,8 @@ class _AddItemState extends State<AddScreen> {
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blueGrey,
-          title: const Text(
-            "ADD LIST",
+          title:  Text(
+            widget.isEditPage?"Edit Task":"Add Task",
             style: TextStyle(
                 fontSize: 25, fontWeight: FontWeight.bold, color: Colors.white),
           ),
@@ -36,7 +71,7 @@ class _AddItemState extends State<AddScreen> {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            icon: Icon(
+            icon: const Icon(
               Icons.arrow_back,
               color: Colors.white,
             ),
@@ -50,6 +85,7 @@ class _AddItemState extends State<AddScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 40, right: 6, left: 6),
                 child: TextFormField(
+                 
                   controller: itemscontroller,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -67,29 +103,24 @@ class _AddItemState extends State<AddScreen> {
               const SizedBox(
                 height: 25,
               ),
-              Container(
+              SizedBox(
                 height: 50,
                 width: 170,
                 child: TextButton(
                   onPressed: () {
-                    if (_formkey.currentState!.validate()) {
-                      widget.item.add(itemscontroller.text);
-                      itemscontroller.text = "";
-                    }
-                    print(widget.item);
-                    //Navigator.of(context).push(MaterialPageRoute(
-                    // builder: (context) => MyApp(textname:)));
+                    widget.isEditPage?updateTask():addTask();
                   },
-                  child: const Text(
-                    "ADD",
-                    style: TextStyle(
+                  style: const ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(Colors.blue),
+                  ),
+                  child:  Text(
+                    widget.isEditPage?"Update":"Add",
+                    style: const TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
                         color: Colors.white),
                   ),
-                  style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Colors.blue),
-                  ),
+                  
                 ),
               )
             ],
