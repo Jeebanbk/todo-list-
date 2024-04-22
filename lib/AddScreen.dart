@@ -1,16 +1,19 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:todolist/controller/todo_Controller.dart';
 import 'package:todolist/main.dart';
+import 'package:todolist/model/task.dart';
 import 'package:todolist/utils/mainScreen.dart';
 
 class AddScreen extends StatefulWidget {
-  List item;
+  bool isEditpage = false;
+  int index = 0;
+  String task = '';
 
-  AddScreen({
-    super.key,
-    required this.item,
-  });
+  AddScreen(
+      {super.key, this.isEditpage = false, this.index = 0, this.task = ''});
 
   @override
   State<AddScreen> createState() => _AddItemState();
@@ -19,6 +22,32 @@ class AddScreen extends StatefulWidget {
 class _AddItemState extends State<AddScreen> {
   final _formkey = GlobalKey<FormState>();
   TextEditingController itemscontroller = TextEditingController();
+  final TodoController todoController = Get.find<TodoController>();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    itemscontroller.text = widget.task;
+  }
+
+  void addTask() {
+    if (_formkey.currentState!.validate()) {
+      Task task = Task(itemscontroller.text, false);
+      todoController.add(task);
+      itemscontroller.text = "";
+    }
+    Get.back();
+  }
+
+  void completedTask() {}
+
+  void updateTask() {
+    Task task = todoController.tasks[widget.index];
+    task.task = itemscontroller.text;
+    todoController.updateTask(widget.index, task);
+    Get.back();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -36,7 +65,7 @@ class _AddItemState extends State<AddScreen> {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            icon: Icon(
+            icon: const Icon(
               Icons.arrow_back,
               color: Colors.white,
             ),
@@ -72,16 +101,13 @@ class _AddItemState extends State<AddScreen> {
                 width: 170,
                 child: TextButton(
                   onPressed: () {
-                    if (_formkey.currentState!.validate()) {
-                      widget.item.add(itemscontroller.text);
-                      itemscontroller.text = "";
-                    }
-                    print(widget.item);
-                    //Navigator.of(context).push(MaterialPageRoute(
-                    // builder: (context) => MyApp(textname:)));
+                    widget.isEditpage ? updateTask() : addTask();
+                    widget.isEditpage
+                        ? Get.snackbar(widget.task, "Updated successfuly")
+                        : Get.snackbar(widget.task, "added successfuly");
                   },
-                  child: const Text(
-                    "ADD",
+                  child: Text(
+                    widget.isEditpage ? "Update" : "Add",
                     style: TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,

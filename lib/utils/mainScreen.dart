@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
+import 'package:todolist/AddScreen.dart';
+import 'package:todolist/controller/todo_Controller.dart';
+import 'package:todolist/model/task.dart';
 
 class AddItem extends StatefulWidget {
-  String textname;
-  AddItem({super.key, required this.textname});
+  Task task;
+  AddItem({super.key, required this.task});
 
   @override
   State<AddItem> createState() => _AddItemState();
 }
 
 class _AddItemState extends State<AddItem> {
-  TextEditingController controller=TextEditingController();
+  TextEditingController controller = TextEditingController();
+  final TodoController todoController = Get.find<TodoController>();
   @override
-  Widget build(BuildContext context) 
-  
-  {
+  Widget build(BuildContext context) {
     return Container(
       height: 70,
       width: double.maxFinite,
@@ -25,26 +28,39 @@ class _AddItemState extends State<AddItem> {
       child: (Row(
         children: [
           IconButton(
-              onPressed: () {},
+              onPressed: () {
+                todoController.toggleTaskStatus(widget.task);
+              },
               icon: Icon(
-                Icons.check_box_outline_blank_outlined,
+                widget.task.isCompleted
+                    ? Icons.check_box
+                    : Icons.check_box_outline_blank,
                 //color: Colors.white,
               )),
           Text(
-            widget.textname,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            widget.task.task,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          SizedBox(
+          const SizedBox(
             width: 130,
           ),
           IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Get.to(AddScreen(
+                  isEditpage: true,
+                  index: todoController.tasks.indexOf(widget.task),
+                  task: widget.task.task,
+                ));
+              },
               icon: Icon(
                 Icons.edit,
                 color: Colors.black,
               )),
           IconButton(
-              onPressed: () {},
+              onPressed: () {
+                todoController
+                    .delete(todoController.tasks.indexOf(widget.task));
+              },
               icon: Icon(
                 Icons.delete,
                 color: Colors.redAccent,
